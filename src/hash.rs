@@ -1,5 +1,4 @@
 use sha2::{Sha256, Sha384, Sha512, Digest};
-use crate::{CryptoError, Result};
 
 pub trait Hash {
     fn update(&mut self, data: &[u8]);

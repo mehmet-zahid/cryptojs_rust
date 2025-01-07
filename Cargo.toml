@@ -2,10 +2,10 @@
 name = "cryptojs_rust"
 version = "0.1.0"
 edition = "2021"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["Mehmet Zahid ISIK <mehmetzahidisik@gmail.com>"]
 description = "A Rust implementation of CryptoJS encryption/decryption functionality"
 license = "MIT"
-repository = "https://github.com/yourusername/cryptojs_rust"
+repository = "https://github.com/mehmet-zahid/cryptojs_rust"
 documentation = "https://docs.rs/cryptojs_rust"
 readme = "README.md"
 keywords = ["cryptography", "aes", "encryption", "cryptojs", "decryption"]
