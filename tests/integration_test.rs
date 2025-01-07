@@ -1,6 +1,6 @@
 use cryptojs_rust::{
     aes::{AesEncryptor, AesDecryptor},
-    hash::{sha256, sha384, sha512, SHA256, SHA384, SHA512, Hash},
+    hash::{sha256, SHA256, Hash},
     utils::{base64, hex},
     Mode, CryptoOperation,
 };
@@ -84,8 +84,6 @@ fn test_hash_functions() {
     
     // Test one-shot hashing
     let sha256_hash = sha256(data);
-    let sha384_hash = sha384(data);
-    let sha512_hash = sha512(data);
 
     assert_eq!(
         hex::encode(&sha256_hash),
