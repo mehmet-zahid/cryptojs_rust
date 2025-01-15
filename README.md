@@ -16,7 +16,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-cryptojs_rust = "0.1.0"
+cryptojs_rust = "0.1.2"
 ```
 
 ## Usage
@@ -26,15 +26,14 @@ Here's a simple example of decrypting CryptoJS encrypted data:
 ```rust
 use cryptojs_rust::cryptojs;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let encrypted_data = "U2FsdGVkX1..."; // Your CryptoJS encrypted string
-    let password = b"your_password";
-    
-    let decrypted = cryptojs::decrypt(encrypted_data, password)?;
-    println!("Decrypted: {}", decrypted);
-    
-    Ok(())
+fn main() {
+    let encrypted_data = "U2FsdGVkX1...";
+    let password = "xxxxxxx";
+
+    let decrypted = cryptojs::decrypt(&encrypted_data, password.as_bytes());
+    println!("Decrypted: {:?}", decrypted);
 }
+
 ```
 
 ## License
