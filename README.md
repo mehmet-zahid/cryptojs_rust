@@ -17,7 +17,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-cryptojs_rust = "0.1.2"
+cryptojs_rust = "0.1.3"
 ```
 
 ## Usage Examples
