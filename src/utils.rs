@@ -12,15 +12,15 @@ pub mod hex {
 }
 
 pub mod base64 {
-    use crate::CryptoError;
     use base64::{Engine as _, engine::general_purpose::STANDARD};
+    use crate::CryptoError;
 
     pub fn encode(data: &[u8]) -> String {
         STANDARD.encode(data)
     }
 
-    pub fn decode(b64_str: &str) -> Result<Vec<u8>, CryptoError> {
-        STANDARD.decode(b64_str)
+    pub fn decode(data: &str) -> Result<Vec<u8>, CryptoError> {
+        STANDARD.decode(data)
             .map_err(|e| CryptoError::InvalidInput(format!("Invalid base64 string: {}", e)))
     }
 } 

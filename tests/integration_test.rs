@@ -3,6 +3,7 @@ use cryptojs_rust::{
     hash::{sha256, SHA256, Hash},
     utils::{base64, hex},
     Mode, CryptoOperation,
+    cryptojs,
 };
 
 #[test]
@@ -16,12 +17,12 @@ fn test_aes_128_encryption_decryption() {
     encryptor.update(data).unwrap();
     let encrypted = encryptor.finalize().unwrap();
 
-    // Get nonce from the first 12 bytes
-    let nonce = &encrypted[..12];
+    // Get IV from the first 16 bytes
+    let iv = &encrypted[..16];
     
     // Decrypt
-    let mut decryptor = AesDecryptor::new_128(&key, Mode::CBC, Some(nonce)).unwrap();
-    decryptor.update(&encrypted[12..]).unwrap();
+    let mut decryptor = AesDecryptor::new_128(&key, Mode::CBC, Some(iv)).unwrap();
+    decryptor.update(&encrypted[16..]).unwrap();
     let decrypted = decryptor.finalize().unwrap();
 
     assert_eq!(data, &decrypted[..]);
@@ -38,12 +39,12 @@ fn test_aes_256_encryption_decryption() {
     encryptor.update(data).unwrap();
     let encrypted = encryptor.finalize().unwrap();
 
-    // Get nonce from the first 12 bytes
-    let nonce = &encrypted[..12];
+    // Get IV from the first 16 bytes
+    let iv = &encrypted[..16];
     
     // Decrypt
-    let mut decryptor = AesDecryptor::new_256(&key, Mode::CBC, Some(nonce)).unwrap();
-    decryptor.update(&encrypted[12..]).unwrap();
+    let mut decryptor = AesDecryptor::new_256(&key, Mode::CBC, Some(iv)).unwrap();
+    decryptor.update(&encrypted[16..]).unwrap();
     let decrypted = decryptor.finalize().unwrap();
 
     assert_eq!(data, &decrypted[..]);
@@ -63,12 +64,12 @@ fn test_streaming_encryption() {
     encryptor.update(data3).unwrap();
     let encrypted = encryptor.finalize().unwrap();
 
-    // Get nonce from the first 12 bytes
-    let nonce = &encrypted[..12];
+    // Get IV from the first 16 bytes
+    let iv = &encrypted[..16];
     
     // Decrypt
-    let mut decryptor = AesDecryptor::new_256(&key, Mode::CBC, Some(nonce)).unwrap();
-    decryptor.update(&encrypted[12..]).unwrap();
+    let mut decryptor = AesDecryptor::new_256(&key, Mode::CBC, Some(iv)).unwrap();
+    decryptor.update(&encrypted[16..]).unwrap();
     let decrypted = decryptor.finalize().unwrap();
 
     let mut expected = Vec::new();
@@ -137,8 +138,27 @@ fn test_decryption_with_wrong_key() {
     let encrypted = encryptor.finalize().unwrap();
 
     // Try to decrypt with key2
-    let nonce = &encrypted[..12];
-    let mut decryptor = AesDecryptor::new_256(&key2, Mode::CBC, Some(nonce)).unwrap();
-    decryptor.update(&encrypted[12..]).unwrap();
+    let iv = &encrypted[..16];
+    let mut decryptor = AesDecryptor::new_256(&key2, Mode::CBC, Some(iv)).unwrap();
+    decryptor.update(&encrypted[16..]).unwrap();
     assert!(decryptor.finalize().is_err()); // Should fail
+}
+
+#[test]
+fn test_cryptojs_decrypt() {
+    // This is a CryptoJS-encrypted string containing "Hello, World!" encrypted with password "test123"
+    // Generated using CryptoJS.AES.encrypt()
+    let encrypted = "U2FsdGVkX18QdIkEG8mOikjNEarOv1P91J6m2+BsgLE=";
+    let password = b"test123";
+    
+    let decrypted = cryptojs::decrypt(encrypted, password).unwrap();
+    assert_eq!(decrypted, "Hello, World!");
+    
+    // Test invalid data format
+    let invalid_data = "InvalidBase64Data";
+    assert!(cryptojs::decrypt(invalid_data, password).is_err());
+    
+    // Test invalid password
+    let wrong_password = b"wrongpass";
+    assert!(cryptojs::decrypt(encrypted, wrong_password).is_err());
 } 
