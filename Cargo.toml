@@ -1,6 +1,6 @@
 [package]
 name = "cryptojs_rust"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 authors = ["Mehmet Zahid ISIK <mehmetzahidisik@gmail.com>"]
 description = "A Rust implementation of CryptoJS encryption/decryption functionality"

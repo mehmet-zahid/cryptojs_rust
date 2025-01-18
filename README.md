@@ -17,7 +17,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-cryptojs_rust = "0.1.3"
+cryptojs_rust = "0.1.4"
 ```
 
 ## Usage Examples
@@ -135,6 +135,60 @@ The library is designed to be compatible with CryptoJS's AES encryption. When us
   - Random salt for each encryption
   - Random IV for each encryption
   - CBC mode with PKCS7 padding
+
+## Changelog
+
+### Version 0.1.4 (Latest)
+- Fixed Node.js compatibility for password-based encryption
+- Updated Node.js decryption example to properly handle salt and IV
+- Clarified the encrypted data format: `[salt (16 bytes)][iv (16 bytes)][ciphertext]`
+- Added detailed Node.js decryption example:
+
+```javascript
+const CryptoJS = require('crypto-js');
+
+function decryptFromRust(encryptedBase64, password) {
+    // Decode base64
+    const encryptedBytes = Buffer.from(encryptedBase64, 'base64');
+    
+    // Extract salt (first 16 bytes), IV (next 16 bytes) and ciphertext
+    const salt = encryptedBytes.subarray(0, 16);
+    const iv = encryptedBytes.subarray(16, 32);
+    const ciphertext = encryptedBytes.subarray(32);
+    
+    // Convert to CryptoJS format
+    const ciphertextWA = CryptoJS.lib.WordArray.create(ciphertext);
+    const ivWA = CryptoJS.lib.WordArray.create(iv);
+    const saltWA = CryptoJS.lib.WordArray.create(salt);
+    
+    // Create key using PBKDF2 (matching Rust parameters)
+    const key = CryptoJS.PBKDF2(password, saltWA, {
+        keySize: 256/32,
+        iterations: 10000,
+        hasher: CryptoJS.algo.SHA256
+    });
+    
+    // Decrypt
+    const decrypted = CryptoJS.AES.decrypt(
+        { ciphertext: ciphertextWA },
+        key,
+        {
+            iv: ivWA,
+            mode: CryptoJS.mode.CBC,
+            padding: CryptoJS.pad.Pkcs7
+        }
+    );
+    
+    return decrypted.toString(CryptoJS.enc.Utf8);
+}
+```
+
+### Version 0.1.3
+- Initial public release
+- AES-256 and AES-128 encryption/decryption
+- Password-based key derivation using PBKDF2
+- CBC mode support
+- Base64 encoding/decoding
 
 ## License
 

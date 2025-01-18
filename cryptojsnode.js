@@ -8,10 +8,13 @@ function decryptFromRust(encryptedBase64, password) {
     const encryptedBytes = Buffer.from(encryptedBase64, 'base64');
     console.log('Decoded bytes length:', encryptedBytes.length);
     
-    // Extract IV (first 16 bytes) and ciphertext
-    const iv = encryptedBytes.slice(0, 16);
-    const ciphertext = encryptedBytes.slice(16);
+    // Extract salt (first 16 bytes), IV (next 16 bytes) and ciphertext
+    const salt = encryptedBytes.subarray(0, 16);
+    const iv = encryptedBytes.subarray(16, 32);
+    const ciphertext = encryptedBytes.subarray(32);
     
+    console.log('Salt length:', salt.length);
+    console.log('Salt bytes:', Buffer.from(salt).toString('hex'));
     console.log('IV length:', iv.length);
     console.log('IV bytes:', Buffer.from(iv).toString('hex'));
     console.log('Ciphertext length:', ciphertext.length);
@@ -19,13 +22,14 @@ function decryptFromRust(encryptedBase64, password) {
     // Convert to CryptoJS format
     const ciphertextWA = CryptoJS.lib.WordArray.create(ciphertext);
     const ivWA = CryptoJS.lib.WordArray.create(iv);
+    const saltWA = CryptoJS.lib.WordArray.create(salt);
     
-    // Create key directly from the 32-byte key string, ensuring exactly 32 bytes
-    const keyBytes = Buffer.alloc(32); // Create a 32-byte buffer
-    Buffer.from(password).copy(keyBytes, 0, 0, 32); // Copy only first 32 bytes
-    console.log('Key length:', keyBytes.length);
-    console.log('Key bytes:', keyBytes.toString('hex'));
-    const key = CryptoJS.lib.WordArray.create(keyBytes);
+    // Create key using PBKDF2
+    const key = CryptoJS.PBKDF2(password, saltWA, {
+        keySize: 256/32,
+        iterations: 10000,
+        hasher: CryptoJS.algo.SHA256
+    });
     
     try {
         // Decrypt
@@ -51,7 +55,7 @@ function decryptFromRust(encryptedBase64, password) {
 // Example usage:
 const fs = require('fs');
 const encrypted = fs.readFileSync('test_encrypted.txt', 'utf8').trim(); // encrypted string from Rust
-const password = "12345678901234567890123456789012";
+const password = "my secret password";
 
 // Decrypt data from Rust
 const decrypted = decryptFromRust(encrypted, password);
